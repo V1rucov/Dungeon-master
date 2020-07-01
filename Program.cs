@@ -9,12 +9,13 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Entities;
 using System.Threading;
 using System.Data.Entity;
+using System.IO;
 
 namespace Dungeon_master
 {
     class Program
     {
-        static string Token = "NTM4NzQzNTY3ODA0MjY4NTQ0.XvMtyQ.g0ysTaA20ERuHtzk-jwAAMFR210";
+        static string Token = new StreamReader(@"C:\Users\rujni\Desktop\token.txt").ReadLine();
         static CommandsNextModule CNMmodule;
         static DiscordClient client { get; set; }
         static void Main(string[] args)
