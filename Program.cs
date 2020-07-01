@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define debug
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,16 +8,22 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Entities;
 using System.Threading;
+using System.Data.Entity;
 
 namespace Dungeon_master
 {
     class Program
     {
-        static string Token = "";
+        static string Token = "NTM4NzQzNTY3ODA0MjY4NTQ0.XvMtyQ.g0ysTaA20ERuHtzk-jwAAMFR210";
         static CommandsNextModule CNMmodule;
         static DiscordClient client { get; set; }
         static void Main(string[] args)
         {
+            #if debug
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("["+DateTime.Now+"]"+"[Dungeon master v1.0] Debug mode");
+            #endif
+            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<CharacterContext>());
             MainAsync(args).GetAwaiter().GetResult();
             Console.ReadLine();
         }

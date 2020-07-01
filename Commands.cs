@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace Dungeon_master
 {
-    class Commands
+    partial class Commands
     {
         static int[] masterstwo = { 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6 };
         static Random r = new Random();
@@ -60,7 +60,7 @@ namespace Dungeon_master
         }
 
         [Command("rc")]
-        [AboutAttribute("Удаляет персонажа.")]
+        [About("Удаляет персонажа.")]
         public async Task rc(CommandContext cmct, string Name)
         {
             using (CharacterContext cc = new CharacterContext())
@@ -94,7 +94,7 @@ namespace Dungeon_master
             using (CharacterContext cc = new CharacterContext())
             {
                 Character person = cc.Characters
-                    .Where(b => b.Имя == Name).FirstOrDefault();
+                    .Where(p => p.Имя == Name).FirstOrDefault();
 
                 person.предыстория = temp;
                 cc.SaveChanges();

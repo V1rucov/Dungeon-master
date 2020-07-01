@@ -12,5 +12,6 @@ namespace Dungeon_master
         public CharacterContext() :base("CharacterContext")
         { }
         public DbSet<Character> Characters { get; set; }
+        public DbSet<Game> Games { get; set; }
     }
 }
