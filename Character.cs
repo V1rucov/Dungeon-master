@@ -23,15 +23,6 @@ namespace Dungeon_master
         [MaxLength(512)]
         public string предыстория { get; set; }
         public int уровень { get; set; }
-    }
-
-    class Game {
-        public int Id { get; set; }
-        public string CampagnName { get; set; }
-        public string Setting { get; set; }
-        public string DM { get; set; }
-        [MaxLength(256)]
-        public string about { get; set; }
-        public List<string> chars = new List<string>();
+        public int инициатива { get; set; }
     }
 }

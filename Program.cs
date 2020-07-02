@@ -10,6 +10,7 @@ using DSharpPlus.Entities;
 using System.Threading;
 using System.Data.Entity;
 using System.IO;
+using System.Diagnostics;
 
 namespace Dungeon_master
 {
@@ -20,19 +21,29 @@ namespace Dungeon_master
         static DiscordClient client { get; set; }
         static void Main(string[] args)
         {
-            #if debug
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("["+DateTime.Now+"]"+"[Dungeon master v1.0] Debug mode");
-            #endif
+            debug();
             Database.SetInitializer(new DropCreateDatabaseIfModelChanges<CharacterContext>());
             MainAsync(args).GetAwaiter().GetResult();
             Console.ReadLine();
         }
+        [Conditional("debug")]
+        static void debug() {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("[" + DateTime.Now + "] "+ " [Dungeon master v1.0] Debug mode -- ");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine("UNCOMMERCIAL USE ONLY");
+        }
         static async Task MainAsync(string[] args)
         {
             client = new DiscordClient(new DiscordConfiguration() { Token = Token, TokenType = TokenType.Bot, UseInternalLogHandler = true, LogLevel = LogLevel.Debug });
-            CNMmodule = client.UseCommandsNext(new CommandsNextConfiguration() { EnableMentionPrefix = true });
+            CNMmodule = client.UseCommandsNext(new CommandsNextConfiguration() { StringPrefix = "/" });
+            client.UseInteractivity(new InteractivityConfiguration()
+            {
+                Timeout = Timeout.InfiniteTimeSpan
+            });
+
             CNMmodule.RegisterCommands<Commands>();
+            CNMmodule.RegisterCommands<OwnerCommands>();
 
             client.MessageCreated += async e =>
             {
