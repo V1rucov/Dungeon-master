@@ -78,19 +78,20 @@ namespace Dungeon_master
         [About("начинает бой.")]
         public async Task bb(CommandContext cmct, params string [] list)
         {
+            Console.WriteLine("[" + DateTime.Now + "]  [Dungeon master v1.0] -- started a battle");
             Character[] members = new Character[list.Length];
             using (CharacterContext cc = new CharacterContext()) {
-                for (int i =0; i<list.Length;i++) {
+                for (int j =0; j<list.Length;j++) {
                     try {
-                        string STemp = list[i];
+                        string STemp = list[j];
                         Character CTemp = cc.Characters.Where(m => m.Имя == STemp).FirstOrDefault();
                         CTemp.инициатива = r.Next(1, 20) + (CTemp.ловкость-10)/2;
-                        members[i] = CTemp;
+                        members[j] = CTemp;
                     }
                     catch (Exception ex) {
                         Console.ForegroundColor = ConsoleColor.DarkYellow;
                         Console.WriteLine("["+DateTime.Now+"]  [Dungeon master v1.0] -- "+ex.Message);
-                        members[i] = new Character() {Имя= list[i], интеллект=10, ловкость=10, мудрость=10, сила=10, телосложение=10, харизма=10, инициатива= r.Next(1,20)};
+                        members[j] = new Character() {Имя= list[j], интеллект=10, ловкость=10, мудрость=10, сила=10, телосложение=10, харизма=10, инициатива= r.Next(1,20)};
                     }
                 }
             }
@@ -116,16 +117,24 @@ namespace Dungeon_master
             await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
             var Interactivity = cmct.Client.GetInteractivityModule();
 
-            bool battle = true;
-            while (battle) {
-                for (int i =0;i<members.Length;i++) {
-                    await cmct.RespondAsync("Сейчас ходит "+members[i].Имя).ConfigureAwait(false);
-                    var message = await Interactivity.WaitForMessageAsync(m => m.Content=="-n").ConfigureAwait(false);
-                    if (message.Message.Content=="-e") {
-                        await cmct.RespondAsync("бой окончен").ConfigureAwait(false);
-                        battle = false;
-                        break;
-                    }
+            int t = 0;
+            while (true) {
+                if (t >= members.Length) t = 0;
+                if (members[t] == null) t++;
+                await cmct.RespondAsync("Сейчас ходит " + members[t].Имя).ConfigureAwait(false);
+                var message = await Interactivity.WaitForMessageAsync(m => m.Channel==cmct.Channel).ConfigureAwait(false);
+                if (message.Message.Content == "-e")
+                {
+                    Console.WriteLine("[" + DateTime.Now + "]  [Dungeon master v1.0] -- ended a battle");
+                    await cmct.RespondAsync("бой окончен");
+                    break;
+                }
+                else if (message.Message.Content == "-n") {
+                    t++;
+                }
+                else if (message.Message.Content == "-k") {
+                    await cmct.RespondAsync(members[t].Имя+" вылетел из боя.");
+                    members[t] = null;
                 }
             }
         }
