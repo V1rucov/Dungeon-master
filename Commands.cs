@@ -205,7 +205,7 @@ namespace Dungeon_master
 
             Type t = typeof(Commands);
             MethodInfo[] methodInfo = t.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
-            await cmct.RespondAsync("_Всего методов_ - " + methodInfo.Length);
+            await cmct.RespondAsync("_Всего команд_ - " + methodInfo.Length);
             string about = "";
             foreach (var CC in methodInfo)
             {
