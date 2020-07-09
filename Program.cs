@@ -35,7 +35,7 @@ namespace Dungeon_master
         }
         static async Task MainAsync(string[] args)
         {
-            client = new DiscordClient(new DiscordConfiguration() { Token = Token, TokenType = TokenType.Bot, UseInternalLogHandler = true, LogLevel = LogLevel.Debug });
+            client = new DiscordClient(new DiscordConfiguration() { Token = Token, TokenType = TokenType.Bot, UseInternalLogHandler = true, LogLevel = LogLevel.Debug});
             CNMmodule = client.UseCommandsNext(new CommandsNextConfiguration() { StringPrefix = "/" });
             client.UseInteractivity(new InteractivityConfiguration()
             {
