@@ -5,10 +5,8 @@ using System.Reflection;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using System.Threading;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Entities;
-using System.Runtime.InteropServices;
 using System.Linq;
 using DSharpPlus.Interactivity;
 
@@ -20,14 +18,12 @@ namespace Dungeon_master
         static Random r = new Random();
 
         [Command("cc")]
-        [About("Создаёт нового персонажа с задаными свойствами.")]
-        public async Task cc(CommandContext cmct, string name, int pow, int dex, int body, int wisdom, int intel, int charisma, params string[] wneshka)
+        [About("Create new character.")]
+        public async Task cc(CommandContext cmct, string name, string clas,int pow, int dex, int body, int wisdom, int intel, int charisma, params string[] wneshka)
         {
             string wneshkaCC = String.Join(" ", wneshka);
-            Character temp = new Character() { Имя = name, сила = pow, ловкость = dex, телосложение = body, мудрость = wisdom, интеллект = intel, харизма = charisma, внешка = wneshkaCC, уровень = 1, инициатива=0};
-            temp.предыстория = "не задано ";
-            //temp.Spell = new spell();
-            //temp.Spell.spellsPerLevel = new int[9];
+            Character temp = new Character() { Имя = name, сила = pow, ловкость = dex, телосложение = body, мудрость = wisdom, интеллект = intel, харизма = charisma, навыки = wneshkaCC, уровень = 1, инициатива=0, класс=clas};
+            temp.предыстория = "no history ";
             using (CharacterContext cc = new CharacterContext())
             {
                 try
@@ -37,81 +33,79 @@ namespace Dungeon_master
                 }
                 catch (Exception ex)
                 {
+                    await cmct.RespondAsync("ERROR!"+ex.Message);
                     Console.WriteLine(ex.Message);
                 }
             }
-            await cmct.RespondAsync("персонаж " + name + " создан");
+            await cmct.RespondAsync("Character " + name + " was created");
             await cmct.Message.DeleteAsync();
         }
         [Command("gc")]
-        [About("Возвращает свойства персонажа.")]
+        [About("Returns a character.")]
         public async Task gc(CommandContext cmct, string Name)
         {
             using (CharacterContext cc = new CharacterContext())
             {
-                foreach (Character CC in cc.Characters)
-                {
-                    if (CC.Имя == Name)
+                try {
+                    var chara = cc.Characters.Where(c => c.Имя == Name).FirstOrDefault();
+                    string wne = String.Join(" ", chara.навыки);
+                    var embed = new DiscordEmbedBuilder()
                     {
-                        string wne = String.Join(" ", CC.внешка);
-                        await cmct.RespondAsync($"Имя - " + CC.Имя +
-                            ". статы: сила " + CC.сила + ", ловкость " + CC.ловкость + ", телосложение " + CC.телосложение + ", мудрость " + CC.мудрость + ", харизма " + CC.харизма + ", интеллект " + CC.интеллект +
-                            ". Внешний вид: " + wne);
-                    }
+                        Color = DiscordColor.DarkRed,
+                        Title = Name,
+                        Description = "**class:** "+chara.класс+", **level**: "+chara.уровень+"\n"+
+                        "**POW:** "+chara.сила+" **DEX:** "+chara.ловкость+" **BOD:** "+chara.телосложение+"\n"+
+                        "**WIS:** "+chara.мудрость+" **INT:** "+chara.интеллект+" **CHA:** "+chara.харизма+"\n"+
+                        "_Skills_: "+wne+"\n"+
+                        "History: "+chara.предыстория
+                    };
+                    var JoinMessage = await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
+                }
+                catch (Exception ex) {
+                    await cmct.RespondAsync("ERROR!" + ex.Message);
                 }
             }
         }
 
         [Command("rc")]
-        [About("Удаляет персонажа.")]
+        [About("Removes a character.")]
         public async Task rc(CommandContext cmct, string Name)
         {
             using (CharacterContext cc = new CharacterContext())
             {
-                Character person = cc.Characters
+                try {
+                    Character person = cc.Characters
                     .Where(b => b.Имя == Name).FirstOrDefault();
 
-                cc.Characters.Remove(person);
-                cc.SaveChanges();
-                await cmct.RespondAsync("Персонаж " + Name + " удалён");
+                    cc.Characters.Remove(person);
+                    cc.SaveChanges();
+                    await cmct.RespondAsync("character " + Name + " was removed");
+                }
+                catch (Exception ex)
+                {
+                    await cmct.RespondAsync("ERROR!" + ex.Message);
+                }
             }
         }
         [Command("lu")]
-        [About("Повышает уровень персонажа (на 1 по умолчанию).")]
+        [About("Increases character level (by 1 by default).")]
         public async Task lu(CommandContext cmct, string Name, int up=1) {
             using (CharacterContext cc = new CharacterContext()) {
-                var chara = cc.Characters.Where(c => c.Имя == Name).FirstOrDefault();
-                chara.уровень = chara.уровень + up;
-                cc.SaveChanges();
-            }
-            await cmct.RespondAsync("Уровень персонажа "+Name+" повышен.");
-        }
-        [Command("ss")]
-        [About("Устанавливает ячейки заклинаний.")]
-        public async Task ss(CommandContext cmct, string Name, params int[] spls) {
-            using (CharacterContext cc = new CharacterContext()) {
-                var chara = cc.Characters.Where(c => c.Имя == Name).FirstOrDefault();
-                for (int i=0;i<spls.Length;i++) {
-                    chara.Spell.spellsPerLevel[i] = spls[i];
+                try
+                {
+                    var chara = cc.Characters.Where(c => c.Имя == Name).FirstOrDefault();
+                    chara.уровень = chara.уровень + up;
+                    cc.SaveChanges();
                 }
-                cc.SaveChanges();
-            }
-            await cmct.RespondAsync("Изменения сохранены.");
-        }
-        [Command("gs")]
-        [About("Возвращает ячейки заклинаний.")]
-        public async Task gs(CommandContext cmct, string Name) {
-            using (CharacterContext cc = new CharacterContext()) {
-                var chara = cc.Characters.Where(c => c.Имя == Name).FirstOrDefault();
-                string ToSend = "*Ячейки заклинаний каждого уровня*: \n";
-                for (int i = 0; i < 9; i++) {
-                    ToSend+= i+" - "+chara.Spell.spellsPerLevel[i].ToString() + " штук. \n";
+                catch (Exception ex)
+                {
+                    await cmct.RespondAsync("ERROR!" + ex.Message);
                 }
-                await cmct.RespondAsync(ToSend).ConfigureAwait(false);
             }
+            await cmct.RespondAsync("Level up "+Name+".");
         }
         [Command("bb")]
-        [About("начинает бой.")]
+        [About("Begins a battle.")]
         public async Task bb(CommandContext cmct, params string [] list)
         {
             Console.WriteLine("[" + DateTime.Now + "]  [Dungeon master v1.0] -- started a battle");
@@ -144,10 +138,11 @@ namespace Dungeon_master
             }
             string compl = "";
             foreach (var CC in members) {
-                compl = compl + CC.Имя + ", инициатива - "+CC.инициатива+". \n";
+                compl = compl + CC.Имя + ", iniciative - "+CC.инициатива+". \n";
             }
             var embed = new DiscordEmbedBuilder {
-                Title = "Участники боя: \n",
+                Title = "battle participants: \n",
+                ImageUrl= "https://i.ytimg.com/vi/w0sUw735gRw/maxresdefault.jpg",
                 Description = compl
             };
             await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
@@ -157,40 +152,27 @@ namespace Dungeon_master
             while (true) {
                 if (t >= members.Length) t = 0;
                 if (members[t] == null) t++;
-                await cmct.RespondAsync("Сейчас ходит " + members[t].Имя).ConfigureAwait(false);
+                await cmct.RespondAsync("turn of " + members[t].Имя).ConfigureAwait(false);
                 var message = await Interactivity.WaitForMessageAsync(m => m.Channel==cmct.Channel).ConfigureAwait(false);
                 if (message.Message.Content == "-e")
                 {
                     Console.WriteLine("[" + DateTime.Now + "]  [Dungeon master v1.0] -- ended a battle");
-                    await cmct.RespondAsync("бой окончен");
+                    await cmct.RespondAsync("battle ended");
                     break;
                 }
                 else if (message.Message.Content == "-n") {
                     t++;
                 }
                 else if (message.Message.Content == "-k") {
-                    await cmct.RespondAsync(members[t].Имя+" вылетел из боя.");
+                    await cmct.RespondAsync(members[t].Имя+" was kicked.");
                     members[t] = null;
                 }
             }
         }
 
         [Command("dr")]
-        [About("Бросает заданную кость.")]
-        public async Task dr(CommandContext cmct, int sides)
-        {
-            await cmct.RespondAsync("результат броска к" + sides + " = " + r.Next(1, sides).ToString());
-        }
-        [Command("drp")]
-        [About("Бросает заданную кость и прибавляет значение.")]
-        public async Task drp(CommandContext cmct, int sides, int bonus)
-        {
-            int CC = r.Next(1, sides) + bonus;
-            await cmct.RespondAsync("результат броска к" + sides + "+" + bonus + " = " + CC);
-        }
-        [Command("drs")]
-        [About("Бросает заданную кость и добавляет бонус от требуемого параметра.")]
-        public async Task drs(CommandContext cmct, int sides, string name, string stat, bool mast = false)
+        [About("Rolls a given dice and adds a bonus from the required parameter and skill.")]
+        public async Task dr(CommandContext cmct, int sides, string name, string stat,int skill = 0, bool mast = false)
         {
             Character person;
             int bon = 0;
@@ -223,24 +205,24 @@ namespace Dungeon_master
             }
             if (mast == false)
             {
-                result = r.Next(1, sides) + bon;
-                await cmct.RespondAsync("Результат броска к" + sides + " +" + stat + " = " + result);
+                result = r.Next(1, sides) + bon+skill;
+                await cmct.RespondAsync("result d" + sides + " +" + stat + skill+" = " + result);
             }
             else
             {
                 int bm = masterstwo[person.уровень];
-                result = r.Next(1, sides) + bon + bm;
-                await cmct.RespondAsync("Результат броска к" + sides + " + " + stat + " + " + bm + " = " + result);
+                result = r.Next(1, sides) + bon + bm+skill;
+                await cmct.RespondAsync("result d" + sides + " + " + stat + " + " + bm + skill+" = " + result);
             }
         }
 
         [Command("gloc")]
-        [About("Возвращет список доступных команд.")]
+        [About("returns list of commands.")]
         public async Task gloc(CommandContext cmct)
         {
             Type t = typeof(Commands);
             MethodInfo[] methodInfo = t.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
-            await cmct.RespondAsync("_Всего команд_ - " + methodInfo.Length);
+            await cmct.RespondAsync("list - " + methodInfo.Length);
             string about = "";
             foreach (var CC in methodInfo)
             {
@@ -248,7 +230,7 @@ namespace Dungeon_master
                 Type atr = typeof(AboutAttribute);
                 AboutAttribute Remark = (AboutAttribute)Attribute.GetCustomAttribute(CC, atr);
 
-                about = about + "**" + CC.Name + "** --" + Remark.Remark + " Параметры:";
+                about = about + "**" + CC.Name + "** --" + Remark.Remark + " params:";
                 ParameterInfo[] pi = CC.GetParameters();
                 for (int i = 1; i < pi.Length; i++)
                 {

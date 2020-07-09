@@ -14,10 +14,8 @@ namespace Dungeon_master
 {
     class OwnerCommands
     {
-        static DiscordRole Moderator;
-
         [Command("CreateSurvey")]
-        [About("Создаёт опрос.")]
+        [About("Creates a survey.")]
         public async Task CreateSurvey(CommandContext cmx, string titel, params string[] message) {
             var embed = new DiscordEmbedBuilder()
             {
@@ -35,24 +33,15 @@ namespace Dungeon_master
             await cmx.Message.DeleteAsync();
         }
         [Command("DeleteMessages")]
-        [About("Удаляет нужное кол-во последних сообщений.")]
+        [About("Deletes the desired number of recent messages.")]
         public async Task dm(CommandContext cmx, int amount)
         {
             var messages = await cmx.Channel.GetMessagesAsync(amount + 1);
 
             await cmx.Channel.DeleteMessagesAsync(messages);
-            var CC = await cmx.RespondAsync("Удалено " + amount + " сообщений");
+            var CC = await cmx.RespondAsync("deleted " + amount + " messages");
             await Task.Delay(5000);
             await CC.DeleteAsync();
-        }
-        [Command("SetModeratorRole")]
-        [About("Устанавлиевает роль для использования комманд владельца.")]
-        public async Task SetModeratorRole(CommandContext cmx) {
-            if (cmx.Member.IsOwner) {
-                var role = cmx.Guild.GetRole(538742467302785025);
-                Moderator = role;
-                await cmx.RespondAsync("установлена роль модератора.");
-            }
         }
     }
 }
