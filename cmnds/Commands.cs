@@ -19,11 +19,11 @@ namespace Dungeon_master
 
         [Command("cc")]
         [About("Create new character.")]
-        public async Task cc(CommandContext cmct, string name, string clas,int pow, int dex, int body, int wisdom, int intel, int charisma, params string[] wneshka)
+        public async Task cc(CommandContext cmct, string name, string clas,int pow, int dex, int body, int wisdom, int intel, int charisma, int dice, int def, params string[] skills)
         {
-            string wneshkaCC = String.Join(" ", wneshka);
-            Character temp = new Character() { Имя = name, сила = pow, ловкость = dex, телосложение = body, мудрость = wisdom, интеллект = intel, харизма = charisma, навыки = wneshkaCC, уровень = 1, инициатива=0, класс=clas};
-            temp.предыстория = "no history ";
+            string skillCC = String.Join(" ", skills);
+            Character temp = new Character() { name = name, pow = pow, dex = dex, bod = body, wis = wisdom, Int = intel, cha = charisma,
+                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice, dice=dice, HP =dice,def=def, history="not yet"};
             using (CharacterContext cc = new CharacterContext())
             {
                 try
@@ -47,17 +47,17 @@ namespace Dungeon_master
             using (CharacterContext cc = new CharacterContext())
             {
                 try {
-                    var chara = cc.Characters.Where(c => c.Имя == Name).FirstOrDefault();
-                    string wne = String.Join(" ", chara.навыки);
+                    var chara = cc.Characters.Where(c => c.name == Name).FirstOrDefault();
+                    string wne = String.Join(" ", chara.skills);
                     var embed = new DiscordEmbedBuilder()
                     {
-                        Color = DiscordColor.DarkRed,
+                        Color = DiscordColor.Cyan,
                         Title = Name,
-                        Description = "**class:** "+chara.класс+", **level**: "+chara.уровень+"\n"+
-                        "**POW:** "+chara.сила+" **DEX:** "+chara.ловкость+" **BOD:** "+chara.телосложение+"\n"+
-                        "**WIS:** "+chara.мудрость+" **INT:** "+chara.интеллект+" **CHA:** "+chara.харизма+"\n"+
+                        Description = "**class**: "+chara.clas+", **level**: "+chara.level+", **defence**: "+chara.def+", **HP**: "+chara.HP+"\n"+
+                        "> **POW:** "+chara.pow+", **DEX:** "+chara.def+", **BOD:** "+chara.bod+"\n"+
+                        "> **WIS:** "+chara.wis+", **INT:** "+chara.Int+", **CHA:** "+chara.cha+"\n"+
                         "_Skills_: "+wne+"\n"+
-                        "History: "+chara.предыстория
+                        "History: "+chara.history
                     };
                     var JoinMessage = await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
                 }
@@ -75,7 +75,7 @@ namespace Dungeon_master
             {
                 try {
                     Character person = cc.Characters
-                    .Where(b => b.Имя == Name).FirstOrDefault();
+                    .Where(b => b.name == Name).FirstOrDefault();
 
                     cc.Characters.Remove(person);
                     cc.SaveChanges();
@@ -93,8 +93,12 @@ namespace Dungeon_master
             using (CharacterContext cc = new CharacterContext()) {
                 try
                 {
-                    var chara = cc.Characters.Where(c => c.Имя == Name).FirstOrDefault();
-                    chara.уровень = chara.уровень + up;
+                    var chara = cc.Characters.Where(c => c.name == Name).FirstOrDefault();
+                    chara.level = chara.level + up;
+                    for (int i =0;i<up;i++) {
+                        chara.max_HP = chara.max_HP + r.Next(1, chara.dice) + (chara.bod - 10) / 2;
+                    }
+                    chara.HP = chara.max_HP;
                     cc.SaveChanges();
                 }
                 catch (Exception ex)
@@ -114,21 +118,21 @@ namespace Dungeon_master
                 for (int j =0; j<list.Length;j++) {
                     try {
                         string STemp = list[j];
-                        Character CTemp = cc.Characters.Where(m => m.Имя == STemp).FirstOrDefault();
-                        CTemp.инициатива = r.Next(1, 20) + (CTemp.ловкость-10)/2;
+                        Character CTemp = cc.Characters.Where(m => m.name == STemp).FirstOrDefault();
+                        CTemp.ini = r.Next(1, 20) + (CTemp.dex-10)/2;
                         members[j] = CTemp;
                     }
                     catch (Exception ex) {
                         Console.ForegroundColor = ConsoleColor.DarkYellow;
                         Console.WriteLine("["+DateTime.Now+"]  [Dungeon master v1.0] -- "+ex.Message);
-                        members[j] = new Character() {Имя= list[j], интеллект=10, ловкость=10, мудрость=10, сила=10, телосложение=10, харизма=10, инициатива= r.Next(1,20)};
+                        members[j] = new Character() {name= list[j], Int=10, dex=10, wis=10, pow=10, bod=10, cha=10, ini= r.Next(1,20)};
                     }
                 }
             }
             for (int j=0;j<4;j++) {
                 for (int i = 0; i < members.Length - 1; i++)
                 {
-                    if (members[i].инициатива < members[i + 1].инициатива)
+                    if (members[i].ini < members[i + 1].ini)
                     {
                         var temp = members[i];
                         members[i] = members[i + 1];
@@ -138,12 +142,12 @@ namespace Dungeon_master
             }
             string compl = "";
             foreach (var CC in members) {
-                compl = compl + CC.Имя + ", iniciative - "+CC.инициатива+". \n";
+                compl = compl + CC.name + ", iniciative - "+CC.ini+". \n";
             }
             var embed = new DiscordEmbedBuilder {
-                Title = "battle participants: \n",
-                ImageUrl= "https://i.ytimg.com/vi/w0sUw735gRw/maxresdefault.jpg",
-                Description = compl
+                Color = DiscordColor.Goldenrod,
+                Title = "Brawl: \n",
+                Description = "Fighters - "+compl
             };
             await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
             var Interactivity = cmct.Client.GetInteractivityModule();
@@ -152,7 +156,7 @@ namespace Dungeon_master
             while (true) {
                 if (t >= members.Length) t = 0;
                 if (members[t] == null) t++;
-                await cmct.RespondAsync("turn of " + members[t].Имя).ConfigureAwait(false);
+                await cmct.RespondAsync("turn of " + members[t].name).ConfigureAwait(false);
                 var message = await Interactivity.WaitForMessageAsync(m => m.Channel==cmct.Channel).ConfigureAwait(false);
                 if (message.Message.Content == "-e")
                 {
@@ -164,7 +168,7 @@ namespace Dungeon_master
                     t++;
                 }
                 else if (message.Message.Content == "-k") {
-                    await cmct.RespondAsync(members[t].Имя+" was kicked.");
+                    await cmct.RespondAsync(members[t].name+" was kicked.");
                     members[t] = null;
                 }
             }
@@ -172,35 +176,38 @@ namespace Dungeon_master
 
         [Command("dr")]
         [About("Rolls a given dice and adds a bonus from the required parameter and skill.")]
-        public async Task dr(CommandContext cmct, int sides, string name, string stat,int skill = 0, bool mast = false)
+        public async Task dr(CommandContext cmct, int sides, string name="_", string stat ="", int skill = 0, bool mast = false)
         {
-            Character person;
+            Character person = new Character() {pow=10, dex=10, bod=10, wis=10, Int=10, cha=10 };
             int bon = 0;
             int result;
-            using (CharacterContext cc = new CharacterContext())
-            {
-                person = cc.Characters
-                    .Where(b => b.Имя == name).FirstOrDefault();
-            }
+            if (name != "_") using (CharacterContext cc = new CharacterContext())
+                {
+                    person = cc.Characters
+                        .Where(b => b.name == name).FirstOrDefault();
+                }
             switch (stat)
             {
                 case "str":
-                    bon = (person.сила - 10) / 2;
+                    bon = (person.pow - 10) / 2;
                     break;
                 case "dex":
-                    bon = (person.ловкость - 10) / 2;
+                    bon = (person.dex - 10) / 2;
                     break;
                 case "bod":
-                    bon = (person.телосложение - 10) / 2;
+                    bon = (person.bod - 10) / 2;
                     break;
                 case "cha":
-                    bon = (person.харизма - 10) / 2;
+                    bon = (person.cha - 10) / 2;
                     break;
                 case "int":
-                    bon = (person.интеллект - 10) / 2;
+                    bon = (person.Int - 10) / 2;
                     break;
                 case "wis":
-                    bon = (person.мудрость - 10) / 2;
+                    bon = (person.wis - 10) / 2;
+                    break;
+                default:
+                    bon = 0;
                     break;
             }
             if (mast == false)
@@ -210,9 +217,26 @@ namespace Dungeon_master
             }
             else
             {
-                int bm = masterstwo[person.уровень];
+                int bm = masterstwo[person.level];
                 result = r.Next(1, sides) + bon + bm+skill;
-                await cmct.RespondAsync("result d" + sides + " + " + stat + " + " + bm + skill+" = " + result);
+                await cmct.RespondAsync("result d" + sides + " + " + stat + " + " + bm +" + "+ skill+" = " + result);
+            }
+        }
+        [Command("mp")]
+        [About("Modify parameter.")]
+        public async Task mp(CommandContext cmct, string personName,string statName,  int param) {
+            using (CharacterContext cc = new CharacterContext()) {
+                try {
+                    Character chara = cc.Characters.Where(c => c.name == personName).FirstOrDefault();
+                    PropertyInfo temp = chara.GetType().GetProperty(statName);
+                    temp.SetValue(chara, param);
+                    cc.SaveChanges();
+                    await cmct.RespondAsync("saved.");
+                }
+                catch (Exception ex)
+                {
+                    await cmct.RespondAsync("ERROR!" + ex.Message);
+                }
             }
         }
 
