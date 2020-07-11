@@ -222,9 +222,19 @@ namespace Dungeon_master
                 await cmct.RespondAsync("result d" + sides + " + " + stat + " + " + bm +" + "+ skill+" = " + result);
             }
         }
+        [Command("dd")]
+        [About("Deal damage.")]
+        public async Task dd(CommandContext cmct, string Name, int damage) {
+            using (CharacterContext cc =new CharacterContext()) {
+                Character person = cc.Characters.Where(c => c.name == Name).FirstOrDefault();
+                person.HP = person.HP - damage;
+                cc.SaveChanges();
+                await cmct.RespondAsync("Dealed " +damage+" damage to "+Name);
+            }
+        }
         [Command("mp")]
         [About("Modify parameter.")]
-        public async Task mp(CommandContext cmct, string personName,string statName,  int param) {
+        public async Task mp(CommandContext cmct, string personName,string statName, int param) {
             using (CharacterContext cc = new CharacterContext()) {
                 try {
                     Character chara = cc.Characters.Where(c => c.name == personName).FirstOrDefault();
