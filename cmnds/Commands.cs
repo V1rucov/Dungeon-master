@@ -51,7 +51,7 @@ namespace Dungeon_master
                     string wne = String.Join(" ", chara.skills);
                     var embed = new DiscordEmbedBuilder()
                     {
-                        Color = DiscordColor.Cyan,
+                        Color = DiscordColor.DarkBlue,
                         Title = Name,
                         Description = "**class**: "+chara.clas+", **level**: "+chara.level+", **defence**: "+chara.def+", **HP**: "+chara.HP+"\n"+
                         "> **POW:** "+chara.pow+", **DEX:** "+chara.def+", **BOD:** "+chara.bod+"\n"+
@@ -112,34 +112,22 @@ namespace Dungeon_master
         [About("Begins a battle.")]
         public async Task bb(CommandContext cmct, params string [] list)
         {
-            Console.WriteLine("[" + DateTime.Now + "]  [Dungeon master v1.0] -- started a battle");
-            Character[] members = new Character[list.Length];
+            List<Character> members = new List<Character>();
             using (CharacterContext cc = new CharacterContext()) {
                 for (int j =0; j<list.Length;j++) {
                     try {
                         string STemp = list[j];
                         Character CTemp = cc.Characters.Where(m => m.name == STemp).FirstOrDefault();
                         CTemp.ini = r.Next(1, 20) + (CTemp.dex-10)/2;
-                        members[j] = CTemp;
+                        members.Add(CTemp);
                     }
                     catch (Exception ex) {
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.WriteLine("["+DateTime.Now+"]  [Dungeon master v1.0] -- "+ex.Message);
-                        members[j] = new Character() {name= list[j], Int=10, dex=10, wis=10, pow=10, bod=10, cha=10, ini= r.Next(1,20)};
+                        Console.WriteLine("ERROR!" + ex.Message);
+                        members.Add(new Character() { name = list[j], Int = 10, dex = 10, wis = 10, pow = 10, bod = 10, cha = 10, ini = r.Next(1, 20) });
                     }
                 }
             }
-            for (int j=0;j<4;j++) {
-                for (int i = 0; i < members.Length - 1; i++)
-                {
-                    if (members[i].ini < members[i + 1].ini)
-                    {
-                        var temp = members[i];
-                        members[i] = members[i + 1];
-                        members[i + 1] = temp;
-                    }
-                }
-            }
+            members.Sort((a,b)=>b.ini.CompareTo(a.ini));
             string compl = "";
             foreach (var CC in members) {
                 compl = compl + CC.name + ", iniciative - "+CC.ini+". \n";
@@ -150,27 +138,14 @@ namespace Dungeon_master
                 Description = "Fighters - "+compl
             };
             await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
-            var Interactivity = cmct.Client.GetInteractivityModule();
 
-            int t = 0;
-            while (true) {
-                if (t >= members.Length) t = 0;
-                if (members[t] == null) t++;
-                await cmct.RespondAsync("turn of " + members[t].name).ConfigureAwait(false);
-                var message = await Interactivity.WaitForMessageAsync(m => m.Channel==cmct.Channel).ConfigureAwait(false);
-                if (message.Message.Content == "-e")
-                {
-                    Console.WriteLine("[" + DateTime.Now + "]  [Dungeon master v1.0] -- ended a battle");
-                    await cmct.RespondAsync("battle ended");
-                    break;
-                }
-                else if (message.Message.Content == "-n") {
-                    t++;
-                }
-                else if (message.Message.Content == "-k") {
-                    await cmct.RespondAsync(members[t].name+" was kicked.");
-                    members[t] = null;
-                }
+            var Interactivity = cmct.Client.GetInteractivityModule();
+            for (int i =0;;i++) {
+                if (i == members.Count) i = 0;
+                await cmct.RespondAsync("turn of " + members[i].name).ConfigureAwait(false);
+                var message = await Interactivity.WaitForMessageAsync(m => m.Channel == cmct.Channel && (m.Content == "-e" || m.Content == "-k" || m.Content == "-n")).ConfigureAwait(false);
+                if (message.Message.Content == "-e") break;
+                else if (message.Message.Content == "-k") members.RemoveAt(i);
             }
         }
 
@@ -232,6 +207,17 @@ namespace Dungeon_master
                 await cmct.RespondAsync("Dealed " +damage+" damage to "+Name);
             }
         }
+        [Command("hr")]
+        [About("Reset HP.")]
+        public async Task hr(CommandContext cmct, string Name) {
+            using (CharacterContext cc = new CharacterContext()) {
+                var person = cc.Characters.Where(c => c.name == Name).FirstOrDefault();
+                person.HP = person.max_HP;
+                cc.SaveChanges();
+                await cmct.RespondAsync("reseted HP for "+Name);
+            }
+        }
+
         [Command("mp")]
         [About("Modify parameter.")]
         public async Task mp(CommandContext cmct, string personName,string statName, int param) {
