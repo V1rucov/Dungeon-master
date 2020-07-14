@@ -217,7 +217,7 @@ namespace Dungeon_master
             }
         }
 
-        [Command("gloc")]
+        [Command("cgloc")]
         [About("returns list of commands.")]
         public async Task gloc(CommandContext cmct)
         {

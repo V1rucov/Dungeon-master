@@ -11,6 +11,7 @@ using System.Threading;
 using System.Data.Entity;
 using System.IO;
 using System.Diagnostics;
+using Dungeon_master.cmnds;
 
 namespace Dungeon_master
 {
@@ -36,7 +37,7 @@ namespace Dungeon_master
         static async Task MainAsync(string[] args)
         {
             client = new DiscordClient(new DiscordConfiguration() { Token = Token, TokenType = TokenType.Bot, UseInternalLogHandler = true, LogLevel = LogLevel.Debug});
-            CNMmodule = client.UseCommandsNext(new CommandsNextConfiguration() { StringPrefix = "/" });
+            CNMmodule = client.UseCommandsNext(new CommandsNextConfiguration() { StringPrefix = "/"});
             client.UseInteractivity(new InteractivityConfiguration()
             {
                 Timeout = Timeout.InfiniteTimeSpan
@@ -44,6 +45,7 @@ namespace Dungeon_master
 
             CNMmodule.RegisterCommands<Commands>();
             CNMmodule.RegisterCommands<OwnerCommands>();
+            CNMmodule.RegisterCommands<PartyCommands>();
 
             client.MessageCreated += async e =>
             {
