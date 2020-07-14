@@ -54,7 +54,7 @@ namespace Dungeon_master
                         Color = DiscordColor.DarkBlue,
                         Title = Name,
                         Description = "**class**: "+chara.clas+", **level**: "+chara.level+", **defence**: "+chara.def+", **HP**: "+chara.HP+"\n"+
-                        "> **POW:** "+chara.pow+", **DEX:** "+chara.def+", **BOD:** "+chara.bod+"\n"+
+                        "> **POW:** "+chara.pow+", **DEX:** "+chara.dex+", **BOD:** "+chara.bod+"\n"+
                         "> **WIS:** "+chara.wis+", **INT:** "+chara.Int+", **CHA:** "+chara.cha+"\n"+
                         "_Skills_: "+wne+"\n"+
                         "History: "+chara.history
@@ -154,46 +154,25 @@ namespace Dungeon_master
         public async Task dr(CommandContext cmct, int sides, string name="_", string stat ="", int skill = 0, bool mast = false)
         {
             Character person = new Character() {pow=10, dex=10, bod=10, wis=10, Int=10, cha=10 };
-            int bon = 0;
             int result;
+            int statBonus = 0;
             if (name != "_") using (CharacterContext cc = new CharacterContext())
-                {
-                    person = cc.Characters
-                        .Where(b => b.name == name).FirstOrDefault();
-                }
-            switch (stat)
             {
-                case "str":
-                    bon = (person.pow - 10) / 2;
-                    break;
-                case "dex":
-                    bon = (person.dex - 10) / 2;
-                    break;
-                case "bod":
-                    bon = (person.bod - 10) / 2;
-                    break;
-                case "cha":
-                    bon = (person.cha - 10) / 2;
-                    break;
-                case "int":
-                    bon = (person.Int - 10) / 2;
-                    break;
-                case "wis":
-                    bon = (person.wis - 10) / 2;
-                    break;
-                default:
-                    bon = 0;
-                    break;
+                person = cc.Characters
+                    .Where(b => b.name == name).FirstOrDefault();
+                PropertyInfo temp = person.GetType().GetProperty(stat);
+                statBonus = (int)temp.GetValue(person);
+                statBonus = (statBonus - 10) / 2;
             }
             if (mast == false)
             {
-                result = r.Next(1, sides) + bon+skill;
-                await cmct.RespondAsync("result d" + sides + " +" + stat + skill+" = " + result);
+                result = r.Next(1, sides) + statBonus+skill;
+                await cmct.RespondAsync("result d" + sides + " +" + stat +" + "+ skill+" = " + result);
             }
             else
             {
                 int bm = masterstwo[person.level];
-                result = r.Next(1, sides) + bon + bm+skill;
+                result = r.Next(1, sides) + statBonus + bm+skill;
                 await cmct.RespondAsync("result d" + sides + " + " + stat + " + " + bm +" + "+ skill+" = " + result);
             }
         }
