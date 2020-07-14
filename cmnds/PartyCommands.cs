@@ -53,7 +53,8 @@ namespace Dungeon_master.cmnds
             {
                 try
                 {
-                    foreach (var chara in Party) {
+                    foreach (var temp in Party) {
+                        var chara = cc.Characters.Where(c => c.name == temp).FirstOrDefault();
                         chara.level = chara.level + up;
                         for (int i = 0; i < up; i++)
                         {
@@ -65,10 +66,10 @@ namespace Dungeon_master.cmnds
                 }
                 catch (Exception ex)
                 {
-                    await cmct.RespondAsync("ERROR!" + ex.Message);
+                    await cmct.RespondAsync("ERROR! " + ex.Message);
                 }
             }
-            await cmct.RespondAsync("Party level up .");
+            await cmct.RespondAsync("Party level up.");
         }
     }
 }
