@@ -9,6 +9,7 @@ using DSharpPlus.EventArgs;
 using DSharpPlus.Entities;
 using System.Linq;
 using DSharpPlus.Interactivity;
+using Dungeon_master.cmnds;
 
 namespace Dungeon_master
 {
@@ -127,26 +128,7 @@ namespace Dungeon_master
                     }
                 }
             }
-            members.Sort((a,b)=>b.ini.CompareTo(a.ini));
-            string compl = "";
-            foreach (var CC in members) {
-                compl = compl + CC.name + ", iniciative - "+CC.ini+". \n";
-            }
-            var embed = new DiscordEmbedBuilder {
-                Color = DiscordColor.Goldenrod,
-                Title = "Brawl: \n",
-                Description = "Fighters - "+compl
-            };
-            await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
-
-            var Interactivity = cmct.Client.GetInteractivityModule();
-            for (int i =0;;i++) {
-                if (i == members.Count) i = 0;
-                await cmct.RespondAsync("turn of " + members[i].name).ConfigureAwait(false);
-                var message = await Interactivity.WaitForMessageAsync(m => m.Channel == cmct.Channel && (m.Content == "-e" || m.Content == "-k" || m.Content == "-n")).ConfigureAwait(false);
-                if (message.Message.Content == "-e") break;
-                else if (message.Message.Content == "-k") members.RemoveAt(i);
-            }
+            PartyCommands.battle(cmct,members);
         }
 
         [Command("dr")]
