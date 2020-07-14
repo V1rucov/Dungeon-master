@@ -220,19 +220,21 @@ namespace Dungeon_master
 
         [Command("mp")]
         [About("Modify parameter.")]
-        public async Task mp(CommandContext cmct, string personName,string statName, int param) {
+        public async Task mp(CommandContext cmct, string personName,string statName, params string[] param) {
             using (CharacterContext cc = new CharacterContext()) {
+                Character chara = cc.Characters.Where(c => c.name == personName).FirstOrDefault();
+                PropertyInfo temp = chara.GetType().GetProperty(statName);
                 try {
-                    Character chara = cc.Characters.Where(c => c.name == personName).FirstOrDefault();
-                    PropertyInfo temp = chara.GetType().GetProperty(statName);
-                    temp.SetValue(chara, param);
-                    cc.SaveChanges();
-                    await cmct.RespondAsync("saved.");
+                    int a = Int32.Parse(param[0]);
+                    temp.SetValue(chara, a);
                 }
-                catch (Exception ex)
+                catch
                 {
-                    await cmct.RespondAsync("ERROR!" + ex.Message);
+                    string x = string.Join(" ", param);
+                    temp.SetValue(chara, x);
                 }
+                await cmct.RespondAsync("saved.");
+                cc.SaveChanges();
             }
         }
 
