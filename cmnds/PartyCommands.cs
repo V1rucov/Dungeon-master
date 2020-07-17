@@ -74,6 +74,7 @@ namespace Dungeon_master.cmnds
         [Command("pbb")]
         [About("begins battle with party.")]
         public async Task pbb(CommandContext cmct, params string[] list) {
+            await cmct.RespondAsync("Started battle.");
             List<Character> members = new List<Character>();
             using (CharacterContext cc = new CharacterContext())
             {

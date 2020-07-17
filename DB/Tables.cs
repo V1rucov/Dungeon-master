@@ -11,6 +11,7 @@ namespace Dungeon_master
         public int Id { get; set; }
         [MaxLength(30)]
         public string name { get; set; }
+        public string ShortName { get; set; }
         public int pow { get; set; }
         public int dex { get; set; }
         public int bod { get; set; }

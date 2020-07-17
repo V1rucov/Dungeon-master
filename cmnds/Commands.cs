@@ -23,8 +23,8 @@ namespace Dungeon_master
         public async Task cc(CommandContext cmct, string name, string clas,int pow, int dex, int body, int wisdom, int intel, int charisma, int dice, int def, params string[] skills)
         {
             string skillCC = String.Join(" ", skills);
-            Character temp = new Character() { name = name, pow = pow, dex = dex, bod = body, wis = wisdom, Int = intel, cha = charisma,
-                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice, dice=dice, HP =dice,def=def, history="not yet"};
+            Character temp = new Character() { ShortName = name, pow = pow, dex = dex, bod = body, wis = wisdom, Int = intel, cha = charisma,
+                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice, dice=dice, HP =dice,def=def, history="no.", name="no."};
             using (CharacterContext cc = new CharacterContext())
             {
                 try
@@ -48,12 +48,12 @@ namespace Dungeon_master
             using (CharacterContext cc = new CharacterContext())
             {
                 try {
-                    var chara = cc.Characters.Where(c => c.name == Name).FirstOrDefault();
+                    var chara = cc.Characters.Where(c => c.ShortName == Name).FirstOrDefault();
                     string wne = String.Join(" ", chara.skills);
                     var embed = new DiscordEmbedBuilder()
                     {
-                        Color = DiscordColor.DarkBlue,
-                        Title = Name,
+                        Color = DiscordColor.Azure,
+                        Title = chara.name+" ("+Name+")",
                         Description = "**class**: "+chara.clas+", **level**: "+chara.level+", **defence**: "+chara.def+", **HP**: "+chara.HP+"\n"+
                         "> **POW:** "+chara.pow+", **DEX:** "+chara.dex+", **BOD:** "+chara.bod+"\n"+
                         "> **WIS:** "+chara.wis+", **INT:** "+chara.Int+", **CHA:** "+chara.cha+"\n"+
@@ -76,7 +76,7 @@ namespace Dungeon_master
             {
                 try {
                     Character person = cc.Characters
-                    .Where(b => b.name == Name).FirstOrDefault();
+                    .Where(b => b.ShortName == Name).FirstOrDefault();
 
                     cc.Characters.Remove(person);
                     cc.SaveChanges();
@@ -94,7 +94,7 @@ namespace Dungeon_master
             using (CharacterContext cc = new CharacterContext()) {
                 try
                 {
-                    var chara = cc.Characters.Where(c => c.name == Name).FirstOrDefault();
+                    var chara = cc.Characters.Where(c => c.ShortName == Name).FirstOrDefault();
                     chara.level = chara.level + up;
                     for (int i =0;i<up;i++) {
                         chara.max_HP = chara.max_HP + r.Next(1, chara.dice) + (chara.bod - 10) / 2;
@@ -113,12 +113,13 @@ namespace Dungeon_master
         [About("Begins a battle.")]
         public async Task bb(CommandContext cmct, params string [] list)
         {
+            await cmct.RespondAsync("Started battle.");
             List<Character> members = new List<Character>();
             using (CharacterContext cc = new CharacterContext()) {
                 for (int j =0; j<list.Length;j++) {
                     try {
                         string STemp = list[j];
-                        Character CTemp = cc.Characters.Where(m => m.name == STemp).FirstOrDefault();
+                        Character CTemp = cc.Characters.Where(m => m.ShortName == STemp).FirstOrDefault();
                         CTemp.ini = r.Next(1, 20) + (CTemp.dex-10)/2;
                         members.Add(CTemp);
                     }
@@ -130,39 +131,11 @@ namespace Dungeon_master
             }
             PartyCommands.battle(cmct,members);
         }
-
-        [Command("dr")]
-        [About("Rolls a given dice and adds a bonus from the required parameter and skill.")]
-        public async Task dr(CommandContext cmct, int sides, string name="_", string stat ="", int skill = 0, bool mast = false)
-        {
-            Character person = new Character() {pow=10, dex=10, bod=10, wis=10, Int=10, cha=10 };
-            int result;
-            int statBonus = 0;
-            if (name != "_") using (CharacterContext cc = new CharacterContext())
-            {
-                person = cc.Characters
-                    .Where(b => b.name == name).FirstOrDefault();
-                PropertyInfo temp = person.GetType().GetProperty(stat);
-                statBonus = (int)temp.GetValue(person);
-                statBonus = (statBonus - 10) / 2;
-            }
-            if (mast == false)
-            {
-                result = r.Next(1, sides) + statBonus+skill;
-                await cmct.RespondAsync("result d" + sides + " +" + stat +" + "+ skill+" = " + result);
-            }
-            else
-            {
-                int bm = masterstwo[person.level];
-                result = r.Next(1, sides) + statBonus + bm+skill;
-                await cmct.RespondAsync("result d" + sides + " + " + stat + " + " + bm +" + "+ skill+" = " + result);
-            }
-        }
         [Command("dd")]
         [About("Deal damage.")]
         public async Task dd(CommandContext cmct, string Name, int damage) {
             using (CharacterContext cc =new CharacterContext()) {
-                Character person = cc.Characters.Where(c => c.name == Name).FirstOrDefault();
+                Character person = cc.Characters.Where(c => c.ShortName == Name).FirstOrDefault();
                 person.HP = person.HP - damage;
                 cc.SaveChanges();
                 await cmct.RespondAsync("Dealed " +damage+" damage to "+Name);
@@ -172,7 +145,7 @@ namespace Dungeon_master
         [About("Reset HP.")]
         public async Task hr(CommandContext cmct, string Name) {
             using (CharacterContext cc = new CharacterContext()) {
-                var person = cc.Characters.Where(c => c.name == Name).FirstOrDefault();
+                var person = cc.Characters.Where(c => c.ShortName == Name).FirstOrDefault();
                 person.HP = person.max_HP;
                 cc.SaveChanges();
                 await cmct.RespondAsync("reseted HP for "+Name);
@@ -183,7 +156,7 @@ namespace Dungeon_master
         [About("Modify parameter.")]
         public async Task mp(CommandContext cmct, string personName,string statName, params string[] param) {
             using (CharacterContext cc = new CharacterContext()) {
-                Character chara = cc.Characters.Where(c => c.name == personName).FirstOrDefault();
+                Character chara = cc.Characters.Where(c => c.ShortName == personName).FirstOrDefault();
                 PropertyInfo temp = chara.GetType().GetProperty(statName);
                 try {
                     int a = Int32.Parse(param[0]);

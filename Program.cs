@@ -46,6 +46,7 @@ namespace Dungeon_master
             CNMmodule.RegisterCommands<Commands>();
             CNMmodule.RegisterCommands<OwnerCommands>();
             CNMmodule.RegisterCommands<PartyCommands>();
+            CNMmodule.RegisterCommands<DiceRoller>();
 
             client.MessageCreated += async e =>
             {
