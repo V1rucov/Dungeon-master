@@ -53,7 +53,6 @@ namespace Dungeon_master.cmnds
                 result += bonus;
                 if (m1.Groups[10].Success) total +=result;
                 message += "> " + expression + " = " + result+"\n";
-                //await cmct.RespondAsync("> "+expression+" = "+result).ConfigureAwait(false);
                 result = 0;
                 bonus = 0;
             }

@@ -29,5 +29,15 @@ namespace Dungeon_master
         public int def { get; set; }
         public int ini { get; set; }
         public string clas { get; set; }
+        public spellPointClass spc { get; set; }
+    }
+    [ComplexType]
+    class spellPointClass {
+        public int[] BaseSpellPointsCount;
+        public int[] SpellPointsCount;
+        public spellPointClass() {
+            BaseSpellPointsCount = new int[9];
+            SpellPointsCount = BaseSpellPointsCount;
+        }
     }
 }

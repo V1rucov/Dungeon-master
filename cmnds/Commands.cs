@@ -13,8 +13,8 @@ using Dungeon_master.cmnds;
 
 namespace Dungeon_master
 {
-     partial class Commands
-     {
+    partial class Commands
+    {
         static int[] masterstwo = { 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6 };
         public static Random r = new Random();
 
@@ -24,7 +24,7 @@ namespace Dungeon_master
         {
             string skillCC = String.Join(" ", skills);
             Character temp = new Character() { ShortName = name, pow = pow, dex = dex, bod = body, wis = wisdom, Int = intel, cha = charisma,
-                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice, dice=dice, HP =dice,def=def, history="no.", name="no."};
+                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice, dice=dice, HP =dice,def=def, history="no.", name="no.", spc= new spellPointClass()};
             using (CharacterContext cc = new CharacterContext())
             {
                 try
@@ -108,6 +108,33 @@ namespace Dungeon_master
                 }
             }
             await cmct.RespondAsync("Level up "+Name+".");
+        }
+        [Command("sp")]
+        [About("Spends magic points.")]
+        public async Task sp(CommandContext cmct, string name, int pointLevel, int points = 1) {
+            using (CharacterContext cc = new CharacterContext()) {
+                var chara = cc.Characters.Where(c => c.ShortName == name).FirstOrDefault();
+                if ((chara.spc.SpellPointsCount[pointLevel] - points) > 0) {
+                    chara.spc.SpellPointsCount[pointLevel] = chara.spc.SpellPointsCount[pointLevel] - points;
+                    cc.SaveChanges();
+                } 
+                else await cmct.RespondAsync("Not enough spell points.").ConfigureAwait(false);
+            }
+        }
+        [Command("ss")]
+        [About("Set spell points or re-set.")]
+        public async Task ss(CommandContext cmct, string name, params int[] s) {
+            using (CharacterContext cc = new CharacterContext()) {
+                var chara = cc.Characters.Where(c => c.ShortName == name).FirstOrDefault();
+                if (s[0] == 0) chara.spc.SpellPointsCount = chara.spc.BaseSpellPointsCount;
+                else {
+                    for (int i=0;i<s.Length;i++) {
+                        chara.spc.BaseSpellPointsCount[i] = s[i];
+                    }
+                }
+                cc.SaveChanges();
+                await cmct.RespondAsync("ok.").ConfigureAwait(false);
+            }
         }
         [Command("bb")]
         [About("Begins a battle.")]
@@ -197,5 +224,5 @@ namespace Dungeon_master
             }
             await cmct.RespondAsync(about);
         }
-     }
+    }
 }

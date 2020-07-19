@@ -16,6 +16,7 @@ namespace Dungeon_master
     {
         [Command("CreateSurvey")]
         [About("Creates a survey.")]
+        [RequireRolesAttribute("вертухай")]
         public async Task CreateSurvey(CommandContext cmx, string titel, params string[] message) {
             var embed = new DiscordEmbedBuilder()
             {
@@ -34,6 +35,7 @@ namespace Dungeon_master
         }
         [Command("DeleteMessages")]
         [About("Deletes the desired number of recent messages.")]
+        [RequireRolesAttribute("вертухай")]
         public async Task dm(CommandContext cmx, int amount)
         {
             var messages = await cmx.Channel.GetMessagesAsync(amount + 1);

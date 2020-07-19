@@ -24,7 +24,7 @@ namespace Dungeon_master.cmnds
                     try
                     {
                         string tempName = names[i];
-                        var temp = cc.Characters.Where(c => c.name == tempName).FirstOrDefault();
+                        var temp = cc.Characters.Where(c => c.ShortName == tempName).FirstOrDefault();
                         Party.Add(temp.name);
                     }
                     catch (Exception ex)
