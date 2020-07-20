@@ -24,7 +24,7 @@ namespace Dungeon_master
         {
             string skillCC = String.Join(" ", skills);
             Character temp = new Character() { ShortName = name, pow = pow, dex = dex, bod = body, wis = wisdom, Int = intel, cha = charisma,
-                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice, dice=dice, HP =dice,def=def, history="no.", name="no.", spc= new spellPointClass()};
+                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice, dice=dice, HP =dice,def=def, history="no.", name="no.", spellPoints="-"};
             using (CharacterContext cc = new CharacterContext())
             {
                 try
@@ -61,6 +61,22 @@ namespace Dungeon_master
                         "History: "+chara.history
                     };
                     var JoinMessage = await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
+                    //spell points
+                    string temp = chara.spellPoints;
+                    string[] splitted = temp.Split();
+                    string message = " (level : count) ";
+                    for (int i = 0; i < splitted.Length - 1; i++)
+                    {
+                        int j = i + 1;
+                        message += "**" + j + "**" + " - " + splitted[i] + ", ";
+                    }
+                    var embedd = new DiscordEmbedBuilder()
+                    {
+                        Color = DiscordColor.Azure,
+                        Title = "Spell points of " + Name,
+                        Description = message
+                    };
+                    await cmct.RespondAsync(embed: embedd).ConfigureAwait(false);
                 }
                 catch (Exception ex) {
                     await cmct.RespondAsync("ERROR!" + ex.Message);
@@ -88,6 +104,7 @@ namespace Dungeon_master
                 }
             }
         }
+
         [Command("lu")]
         [About("Increases character level (by 1 by default).")]
         public async Task lu(CommandContext cmct, string Name, int up=1) {
@@ -109,33 +126,43 @@ namespace Dungeon_master
             }
             await cmct.RespondAsync("Level up "+Name+".");
         }
-        [Command("sp")]
-        [About("Spends magic points.")]
-        public async Task sp(CommandContext cmct, string name, int pointLevel, int points = 1) {
-            using (CharacterContext cc = new CharacterContext()) {
-                var chara = cc.Characters.Where(c => c.ShortName == name).FirstOrDefault();
-                if ((chara.spc.SpellPointsCount[pointLevel] - points) > 0) {
-                    chara.spc.SpellPointsCount[pointLevel] = chara.spc.SpellPointsCount[pointLevel] - points;
-                    cc.SaveChanges();
-                } 
-                else await cmct.RespondAsync("Not enough spell points.").ConfigureAwait(false);
-            }
-        }
         [Command("ss")]
-        [About("Set spell points or re-set.")]
-        public async Task ss(CommandContext cmct, string name, params int[] s) {
+        [About("Set a spell point.")]
+        public async Task ss(CommandContext cmct, string name, params string[] points) {
             using (CharacterContext cc = new CharacterContext()) {
                 var chara = cc.Characters.Where(c => c.ShortName == name).FirstOrDefault();
-                if (s[0] == 0) chara.spc.SpellPointsCount = chara.spc.BaseSpellPointsCount;
-                else {
-                    for (int i=0;i<s.Length;i++) {
-                        chara.spc.BaseSpellPointsCount[i] = s[i];
-                    }
+                string toInput = "";
+                for (int i =0; i<points.Length; i++) {
+                    int j = i + 1;
+                    toInput += points[i]+" ";
                 }
+                chara.spellPoints = toInput;
                 cc.SaveChanges();
-                await cmct.RespondAsync("ok.").ConfigureAwait(false);
+                await cmct.RespondAsync(toInput);
             }
         }
+        [Command("us")]
+        [About("Use a spell.")]
+        public async Task us(CommandContext cmct, string name, int pointLevel, int pointCount = 1) {
+            using (CharacterContext cc = new CharacterContext())
+            {
+                pointLevel = pointLevel - 1;
+                var chara = cc.Characters.Where(c => c.ShortName == name).FirstOrDefault();
+                string[] splitted = chara.spellPoints.Split();
+                int temp = int.Parse(splitted[pointLevel]);
+                if (temp - pointCount >= 0)
+                {
+                    temp -= pointCount;
+                    splitted[pointLevel] = temp.ToString();
+                    chara.spellPoints = string.Join(" ",splitted);
+                    cc.SaveChanges();
+                    await cmct.RespondAsync("ok.");
+                }
+                else await cmct.RespondAsync("Not enough spell points.");
+
+            }
+        }
+
         [Command("bb")]
         [About("Begins a battle.")]
         public async Task bb(CommandContext cmct, params string [] list)
