@@ -30,5 +30,10 @@ namespace Dungeon_master
         public int ini { get; set; }
         public string clas { get; set; }
         public string spellPoints { get; set; }
+        public List<weapon> weapons { get; set; }
+    }
+    class weapon { 
+        public int damage { get; set; }
+        public int Name { get; set; }
     }
 }
