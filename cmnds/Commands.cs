@@ -24,7 +24,7 @@ namespace Dungeon_master
         {
             string skillCC = String.Join(" ", skills);
             Character temp = new Character() { ShortName = name, pow = pow, dex = dex, bod = body, wis = wisdom, Int = intel, cha = charisma,
-                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice, dice=dice, HP =dice,def=def, history="no.", name="no.", spellPoints="-"};
+                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice, dice=dice, HP =dice,def=def, history="no.", name="no.", spellPoints="-", Weapon=new weapon()};
             using (CharacterContext cc = new CharacterContext())
             {
                 try
@@ -58,8 +58,11 @@ namespace Dungeon_master
                         "> **POW:** "+chara.pow+", **DEX:** "+chara.dex+", **BOD:** "+chara.bod+"\n"+
                         "> **WIS:** "+chara.wis+", **INT:** "+chara.Int+", **CHA:** "+chara.cha+"\n"+
                         "_Skills_: "+wne+"\n"+
-                        "History: "+chara.history
+                        "History: "+chara.history+"\n"
                     };
+                    if (chara.Weapon != null) {
+                        embed.Description += "> **Weapon: **" + chara.Weapon.Name;
+                    }
                     var JoinMessage = await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
                     //spell points
                     string temp = chara.spellPoints;

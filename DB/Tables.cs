@@ -30,10 +30,15 @@ namespace Dungeon_master
         public int ini { get; set; }
         public string clas { get; set; }
         public string spellPoints { get; set; }
-        public List<weapon> weapons { get; set; }
+        public weapon Weapon { get; set; }
     }
+    [ComplexType]
     class weapon { 
+        //public int Id { get; set; }
         public int damage { get; set; }
-        public int Name { get; set; }
+        public string Name { get; set; }
+
+        //public int? CharacterId { get; set; }
+        //public Character character { get; set; }
     }
 }
