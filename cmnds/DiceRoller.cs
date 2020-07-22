@@ -28,7 +28,7 @@ namespace Dungeon_master.cmnds
 
             foreach (string mtch in context) {
 
-                Match m1 = Regex.Match(mtch, @"(\d)?d(\d)(\d)?(\+\d(\d)?)?(\+\d(\d)?)?(\+\d(\d)?)?(t)?", RegexOptions.IgnoreCase);
+                Match m1 = Regex.Match(mtch, @"(\d)?d(\d)(\d)?(\+\d(\d)?)?(\+\d(\d)?)?(\+\d(\d)?)?(\-\d(\d)?)?(\-\d(\d)?)?(\-\d(\d)?)?(t)?", RegexOptions.IgnoreCase);
                 string expression = m1.Groups[0].Value;
                 if (m1.Groups[1].Success) {
                     count = int.Parse(expression[0].ToString());
@@ -50,8 +50,19 @@ namespace Dungeon_master.cmnds
                         }
                     }
                 }
+                for (int i = 10; i < 14; i = i + 2)
+                {
+                    if (m1.Groups[i].Success)
+                    {
+                        bonus -= int.Parse(expression[m1.Groups[i].Index + 1].ToString());
+                        if (m1.Groups[i + 1].Success)
+                        {
+                            bonus -= int.Parse(expression[m1.Groups[i].Index + 1].ToString() + expression[m1.Groups[i + 1].Index].ToString()) - 1;
+                        }
+                    }
+                }
                 result += bonus;
-                if (m1.Groups[10].Success) total +=result;
+                if (m1.Groups[16].Success) total +=result;
                 message += "> " + expression + " = " + result+"\n";
                 result = 0;
                 bonus = 0;

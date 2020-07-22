@@ -34,11 +34,7 @@ namespace Dungeon_master
     }
     [ComplexType]
     class weapon { 
-        //public int Id { get; set; }
         public int damage { get; set; }
         public string Name { get; set; }
-
-        //public int? CharacterId { get; set; }
-        //public Character character { get; set; }
     }
 }
