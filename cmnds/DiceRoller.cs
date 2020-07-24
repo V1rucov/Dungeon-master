@@ -50,7 +50,7 @@ namespace Dungeon_master.cmnds
                         }
                     }
                 }
-                for (int i = 10; i < 14; i = i + 2)
+                for (int i = 10; i < 15; i = i + 2)
                 {
                     if (m1.Groups[i].Success)
                     {
