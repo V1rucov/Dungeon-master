@@ -13,8 +13,7 @@
 - Join my Discord server
 
 #### Links
-[Dungeon Master](https://discord.com/oauth2/authorize?client_id=538743567804268544&scope=bot)
 
 [Discord server](https://discord.gg/7NVkebu)
 
-Bot's wiki - 
+[Bot's wiki](https://github.com/V1rucov/Dungeon-master/wiki) 
