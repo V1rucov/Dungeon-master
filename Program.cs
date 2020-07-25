@@ -1,5 +1,4 @@
-﻿#define debug
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,16 +11,18 @@ using System.Data.Entity;
 using System.IO;
 using System.Diagnostics;
 using Dungeon_master.cmnds;
+using System.Xml;
 
 namespace Dungeon_master
 {
     class Program
     {
-        static string Token = new StreamReader(@"C:\Users\rujni\Desktop\token.txt").ReadLine();
+        public static string Token { get; set; }
         static CommandsNextModule CNMmodule;
         static DiscordClient client { get; set; }
         static void Main(string[] args)
         {
+            preLoad();
             debug();
             Database.SetInitializer(new DropCreateDatabaseIfModelChanges<CharacterContext>());
             MainAsync(args).GetAwaiter().GetResult();
@@ -34,9 +35,23 @@ namespace Dungeon_master
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine("UNCOMMERCIAL USE ONLY");
         }
+        static void preLoad() {
+            XmlDocument config = new XmlDocument();
+            config.Load(@"bot.xml");
+            XmlElement root = config.DocumentElement;
+            foreach (XmlNode cc in root)
+            {
+                XmlNode attr = cc.Attributes.GetNamedItem("contentType");
+                if (attr.Value == "token")
+                {
+                    XmlNode content = cc.ChildNodes[0];
+                    Token = content.InnerText;
+                }
+            }
+        }
         static async Task MainAsync(string[] args)
         {
-            client = new DiscordClient(new DiscordConfiguration() { Token = Token, TokenType = TokenType.Bot, UseInternalLogHandler = true, LogLevel = LogLevel.Debug});
+            client = new DiscordClient(new DiscordConfiguration() { Token = Token, TokenType = TokenType.Bot, UseInternalLogHandler = true});
             CNMmodule = client.UseCommandsNext(new CommandsNextConfiguration() { StringPrefix = "/"});
             client.UseInteractivity(new InteractivityConfiguration()
             {
