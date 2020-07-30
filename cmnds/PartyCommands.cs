@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Reflection;
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.EventArgs;
 using DSharpPlus.Entities;
 using System.Linq;
 using DSharpPlus.Interactivity;

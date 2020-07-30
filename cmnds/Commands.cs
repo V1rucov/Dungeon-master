@@ -5,7 +5,6 @@ using System.Reflection;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.EventArgs;
 using DSharpPlus.Entities;
 using System.Linq;
 using DSharpPlus.Interactivity;
@@ -24,7 +23,7 @@ namespace Dungeon_master
         {
             string skillCC = String.Join(" ", skills);
             Character temp = new Character() { ShortName = name, pow = pow, dex = dex, bod = body, wis = wisdom, Int = intel, cha = charisma,
-                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice, dice=dice, HP =dice,def=def, history="no.", name="no.", spellPoints="-", Weapon=new weapon()};
+                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice, dice=dice, HP =dice,def=def, history="no.", name="no.", spellPoints="-"};
             using (CharacterContext cc = new CharacterContext())
             {
                 try
@@ -60,9 +59,6 @@ namespace Dungeon_master
                         "_Skills_: "+wne+"\n"+
                         "History: "+chara.history+"\n"
                     };
-                    if (chara.Weapon != null) {
-                        embed.Description += "> **Weapon: **" + chara.Weapon.Name;
-                    }
                     var JoinMessage = await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
                     //spell points
                     string temp = chara.spellPoints;

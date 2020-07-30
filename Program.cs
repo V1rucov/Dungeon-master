@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Interactivity;
-using DSharpPlus.Entities;
 using System.Threading;
-using System.Data.Entity;
-using System.IO;
 using System.Diagnostics;
 using Dungeon_master.cmnds;
 using System.Xml;
@@ -24,7 +19,6 @@ namespace Dungeon_master
         {
             preLoad();
             debug();
-            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<CharacterContext>());
             MainAsync(args).GetAwaiter().GetResult();
             Console.ReadLine();
         }
@@ -62,7 +56,6 @@ namespace Dungeon_master
             CNMmodule.RegisterCommands<OwnerCommands>();
             CNMmodule.RegisterCommands<PartyCommands>();
             CNMmodule.RegisterCommands<DiceRoller>();
-            CNMmodule.RegisterCommands<WeaponCommands>();
 
             client.MessageCreated += async e =>
             {

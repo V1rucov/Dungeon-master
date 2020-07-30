@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Reflection;
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.EventArgs;
 using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-using Dungeon_master.cmnds;
 using System.Linq;
 using System.Xml;
 

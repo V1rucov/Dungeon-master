@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
 
 namespace Dungeon_master
 {
     class CharacterContext : DbContext
     {
-        public CharacterContext() :base("CharacterContext")
-        { }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlite("Filename=characters.db");
+        }
         public DbSet<Character> Characters { get; set; }
     }
 }
