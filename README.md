@@ -5,9 +5,9 @@
 - completely free
 - New features are constantly added and old ones are improved.
 
-|Dev|Lang|API|
-|---|---|---|
-|IUserInterface|c#|DSharpPlus|
+|Dev|Lang|API|DB|
+|---|---|---|---|
+|IUserInterface|c#|DSharpPlus|SQLite|
 #### Like this bot?
 - Star this repo
 - Join my Discord server
