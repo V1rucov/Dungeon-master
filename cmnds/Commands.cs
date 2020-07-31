@@ -14,7 +14,7 @@ namespace Dungeon_master
 {
     partial class Commands
     {
-        static int[] masterstwo = { 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6 };
+        static readonly int[] masterstwo = { 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6 };
         public static Random r = new Random();
 
         [Command("cc")]

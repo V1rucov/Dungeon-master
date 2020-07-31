@@ -7,6 +7,7 @@ using System.Threading;
 using System.Diagnostics;
 using Dungeon_master.cmnds;
 using System.Xml;
+using IUI.SaveLoad;
 
 namespace Dungeon_master
 {
@@ -15,11 +16,11 @@ namespace Dungeon_master
         public static string Token { get; set; }
         static CommandsNextModule CNMmodule;
         static DiscordClient client { get; set; }
-        static void Main(string[] args)
+        static void Main()
         {
             preLoad();
             debug();
-            MainAsync(args).GetAwaiter().GetResult();
+            MainAsync().GetAwaiter().GetResult();
             Console.ReadLine();
         }
         [Conditional("debug")]
@@ -43,9 +44,9 @@ namespace Dungeon_master
                 }
             }
         }
-        static async Task MainAsync(string[] args)
+        static async Task MainAsync()
         {
-            client = new DiscordClient(new DiscordConfiguration() { Token = Token, TokenType = TokenType.Bot, UseInternalLogHandler = true});
+            client = new DiscordClient(new DiscordConfiguration() { Token = Token, TokenType = TokenType.Bot, UseInternalLogHandler = true, LogLevel = LogLevel.Debug});
             CNMmodule = client.UseCommandsNext(new CommandsNextConfiguration() { StringPrefix = "/"});
             client.UseInteractivity(new InteractivityConfiguration()
             {
@@ -56,6 +57,7 @@ namespace Dungeon_master
             CNMmodule.RegisterCommands<OwnerCommands>();
             CNMmodule.RegisterCommands<PartyCommands>();
             CNMmodule.RegisterCommands<DiceRoller>();
+            CNMmodule.RegisterCommands<LoadCommands>();
 
             client.MessageCreated += async e =>
             {
