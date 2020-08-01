@@ -17,6 +17,20 @@ namespace Dungeon_master
         static readonly int[] masterstwo = { 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6 };
         public static Random r = new Random();
 
+        [Command("check")]
+        [About("checks a param.")]
+        public async Task check(CommandContext cmct, string personName, string statName) {
+            using (CharacterContext cc = new CharacterContext())
+            {
+                Character chara = cc.Characters.Where(c => c.ShortName == personName).FirstOrDefault();
+                PropertyInfo temp = chara.GetType().GetProperty(statName);
+                int result = r.Next(1, 20) + ((int)temp.GetValue(chara)-10)/2;
+
+                await cmct.RespondAsync("result - D20 + "+statName+" = "+result).ConfigureAwait(false);
+                cc.SaveChanges();
+            }
+        }
+
         [Command("cc")]
         [About("Create new character.")]
         public async Task cc(CommandContext cmct, string name, string clas,int pow, int dex, int body, int wisdom, int intel, int charisma, int dice, int def, params string[] skills)
@@ -164,12 +178,20 @@ namespace Dungeon_master
 
         [Command("bb")]
         [About("Begins a battle.")]
-        public async Task bb(CommandContext cmct, params string [] list)
+        public async Task bb(CommandContext cmct,bool team, params string [] list)
         {
             await cmct.RespondAsync("Started battle.");
             List<Character> members = new List<Character>();
             using (CharacterContext cc = new CharacterContext()) {
                 for (int j =0; j<list.Length;j++) {
+                    if (team) {
+                        foreach (var temp in PartyCommands.Party)
+                        {
+                            var person = cc.Characters.Where(c => c.name == temp).FirstOrDefault();
+                            person.ini = Commands.r.Next(1, 20) + (person.dex - 10) / 2;
+                            members.Add(person);
+                        }
+                    }
                     try {
                         string STemp = list[j];
                         Character CTemp = cc.Characters.Where(m => m.ShortName == STemp).FirstOrDefault();
