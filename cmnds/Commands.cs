@@ -9,6 +9,7 @@ using DSharpPlus.Entities;
 using System.Linq;
 using DSharpPlus.Interactivity;
 using Dungeon_master.cmnds;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Dungeon_master
 {
@@ -19,15 +20,27 @@ namespace Dungeon_master
 
         [Command("check")]
         [About("checks a param.")]
-        public async Task check(CommandContext cmct, string personName, string statName) {
+        public async Task check(CommandContext cmct, string personName, string statName, string skillName=null) {
             using (CharacterContext cc = new CharacterContext())
             {
                 Character chara = cc.Characters.Where(c => c.ShortName == personName).FirstOrDefault();
                 PropertyInfo temp = chara.GetType().GetProperty(statName);
-                int result = r.Next(1, 20) + ((int)temp.GetValue(chara)-10)/2;
-
-                await cmct.RespondAsync("result - D20 + "+statName+" = "+result).ConfigureAwait(false);
-                cc.SaveChanges();
+                int result = 0;
+                if (skillName==null) {
+                    result = r.Next(1, 20) + ((int)temp.GetValue(chara) - 10) / 2;
+                    await cmct.RespondAsync("result = D20 + " + ((int)temp.GetValue(chara) - 10) / 2 + " = " + result).ConfigureAwait(false);
+                }
+                else if(skillName!=null)
+                {
+                    PropertyInfo pi = chara.GetType().GetProperty("skills");
+                    string skill = (string)pi.GetValue(chara);
+                    skill = skill.Replace(",", string.Empty);
+                    string[] skills = skill.Split();
+                    int stp = skills.IndexOf(skillName)+1;
+                    int bonus = skills[stp].Length;
+                    result = r.Next(1, 20) + ((int)temp.GetValue(chara) - 10) / 2 + masterstwo[chara.level] * bonus;
+                    await cmct.RespondAsync("result = D20 + " + ((int)temp.GetValue(chara) - 10) / 2 + " + " + masterstwo[chara.level] * bonus + " = " + result);
+                }
             }
         }
 
