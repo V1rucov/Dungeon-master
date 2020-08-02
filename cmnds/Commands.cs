@@ -34,7 +34,10 @@ namespace Dungeon_master
                 {
                     PropertyInfo pi = chara.GetType().GetProperty("skills");
                     string skill = (string)pi.GetValue(chara);
+<<<<<<< HEAD
                     skill = skill.Replace(",", string.Empty);
+=======
+>>>>>>> e8228072b334c70800f65e8cac3ac5dc92bea5ec
                     string[] skills = skill.Split();
                     int stp = skills.IndexOf(skillName)+1;
                     int bonus = skills[stp].Length;
