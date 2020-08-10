@@ -10,6 +10,7 @@ using System.Linq;
 using DSharpPlus.Interactivity;
 using Dungeon_master.cmnds;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace Dungeon_master
 {
@@ -23,8 +24,21 @@ namespace Dungeon_master
         public async Task check(CommandContext cmct, string personName, string statName, string skillName=null) {
             using (CharacterContext cc = new CharacterContext())
             {
-                Character chara = cc.Characters.Where(c => c.ShortName == personName).FirstOrDefault();
-                PropertyInfo temp = chara.GetType().GetProperty(statName);
+                Character chara = null;
+                PropertyInfo temp = null;
+                try {
+                    chara = cc.Characters.Where(c => c.ShortName == personName).FirstOrDefault();
+                    temp = chara.GetType().GetProperty(statName);
+                }
+                catch (NullReferenceException ex) {
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Color = DiscordColor.Black,
+                        Title = "Error!",
+                        Description = "Character with name " + personName + " does not exist in database."
+                    };
+                    await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
+                }
                 int result = 0;
                 if (skillName==null) {
                     result = r.Next(1, 20) + ((int)temp.GetValue(chara) - 10) / 2;
@@ -34,10 +48,7 @@ namespace Dungeon_master
                 {
                     PropertyInfo pi = chara.GetType().GetProperty("skills");
                     string skill = (string)pi.GetValue(chara);
-<<<<<<< HEAD
                     skill = skill.Replace(",", string.Empty);
-=======
->>>>>>> e8228072b334c70800f65e8cac3ac5dc92bea5ec
                     string[] skills = skill.Split();
                     int stp = skills.IndexOf(skillName)+1;
                     int bonus = skills[stp].Length;
@@ -90,7 +101,6 @@ namespace Dungeon_master
                         "History: "+chara.history+"\n"
                     };
                     var JoinMessage = await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
-                    //spell points
                     string temp = chara.spellPoints;
                     string[] splitted = temp.Split();
                     string message = " (level : count) ";
@@ -107,8 +117,14 @@ namespace Dungeon_master
                     };
                     await cmct.RespondAsync(embed: embedd).ConfigureAwait(false);
                 }
-                catch (Exception ex) {
-                    await cmct.RespondAsync("ERROR!" + ex.Message);
+                catch (NullReferenceException ex) {
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Color = DiscordColor.Black,
+                        Title = "Error!",
+                        Description = "Character with name " + Name + " does not exist in database."
+                    };
+                    await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
                 }
             }
         }
@@ -127,9 +143,15 @@ namespace Dungeon_master
                     cc.SaveChanges();
                     await cmct.RespondAsync("character " + Name + " was removed");
                 }
-                catch (Exception ex)
+                catch (NullReferenceException ex)
                 {
-                    await cmct.RespondAsync("ERROR!" + ex.Message);
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Color = DiscordColor.Black,
+                        Title = "Error!",
+                        Description = "Character with name " + Name + " does not exist in database."
+                    };
+                    await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
                 }
             }
         }
@@ -148,47 +170,78 @@ namespace Dungeon_master
                     chara.HP = chara.max_HP;
                     cc.SaveChanges();
                 }
-                catch (Exception ex)
+                catch (NullReferenceException ex)
                 {
-                    await cmct.RespondAsync("ERROR!" + ex.Message);
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Color = DiscordColor.Black,
+                        Title = "Error!",
+                        Description = "Character with name " + Name + " does not exist in database."
+                    };
+                    await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
                 }
             }
             await cmct.RespondAsync("Level up "+Name+".");
         }
         [Command("ss")]
         [About("Set a spell point.")]
-        public async Task ss(CommandContext cmct, string name, params string[] points) {
+        public async Task ss(CommandContext cmct, string Name, params string[] points) {
             using (CharacterContext cc = new CharacterContext()) {
-                var chara = cc.Characters.Where(c => c.ShortName == name).FirstOrDefault();
-                string toInput = "";
-                for (int i =0; i<points.Length; i++) {
-                    int j = i + 1;
-                    toInput += points[i]+" ";
+                try {
+                    var chara = cc.Characters.Where(c => c.ShortName == Name).FirstOrDefault();
+                    string toInput = "";
+                    for (int i = 0; i < points.Length; i++)
+                    {
+                        int j = i + 1;
+                        toInput += points[i] + " ";
+                    }
+                    chara.spellPoints = toInput;
+                    cc.SaveChanges();
+                    await cmct.RespondAsync(toInput);
                 }
-                chara.spellPoints = toInput;
-                cc.SaveChanges();
-                await cmct.RespondAsync(toInput);
+                catch (NullReferenceException ex)
+                {
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Color = DiscordColor.Black,
+                        Title = "Error!",
+                        Description = "Character with name " + Name + " does not exist in database."
+                    };
+                    await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
+                }
             }
         }
         [Command("us")]
         [About("Use a spell.")]
-        public async Task us(CommandContext cmct, string name, int pointLevel, int pointCount = 1) {
+        public async Task us(CommandContext cmct, string Name, int pointLevel, int pointCount = 1) {
             using (CharacterContext cc = new CharacterContext())
             {
-                pointLevel = pointLevel - 1;
-                var chara = cc.Characters.Where(c => c.ShortName == name).FirstOrDefault();
-                string[] splitted = chara.spellPoints.Split();
-                int temp = int.Parse(splitted[pointLevel]);
-                if (temp - pointCount >= 0)
+                try
                 {
-                    temp -= pointCount;
-                    splitted[pointLevel] = temp.ToString();
-                    chara.spellPoints = string.Join(" ",splitted);
-                    cc.SaveChanges();
-                    await cmct.RespondAsync("ok.");
+                    pointLevel = pointLevel - 1;
+                    var chara = cc.Characters.Where(c => c.ShortName == Name).FirstOrDefault();
+                    string[] splitted = chara.spellPoints.Split();
+                    int temp = int.Parse(splitted[pointLevel]);
+                    if (temp - pointCount >= 0)
+                    {
+                        temp -= pointCount;
+                        splitted[pointLevel] = temp.ToString();
+                        chara.spellPoints = string.Join(" ", splitted);
+                        cc.SaveChanges();
+                        await cmct.RespondAsync("ok.");
+                    }
+                    else await cmct.RespondAsync("Not enough spell points.");
                 }
-                else await cmct.RespondAsync("Not enough spell points.");
-
+                catch (NullReferenceException ex)
+                {
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Color = DiscordColor.Black,
+                        Title = "Error!",
+                        Description = "Character with name " + Name + " does not exist in database."
+                    };
+                    await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
+                }
             }
         }
 
@@ -215,7 +268,6 @@ namespace Dungeon_master
                         members.Add(CTemp);
                     }
                     catch (Exception ex) {
-                        Console.WriteLine("ERROR!" + ex.Message);
                         members.Add(new Character() { name = list[j], Int = 10, dex = 10, wis = 10, pow = 10, bod = 10, cha = 10, ini = r.Next(1, 20) });
                     }
                 }
@@ -226,20 +278,44 @@ namespace Dungeon_master
         [About("Deal damage.")]
         public async Task dd(CommandContext cmct, string Name, int damage) {
             using (CharacterContext cc =new CharacterContext()) {
-                Character person = cc.Characters.Where(c => c.ShortName == Name).FirstOrDefault();
-                person.HP = person.HP - damage;
-                cc.SaveChanges();
-                await cmct.RespondAsync("Dealed " +damage+" damage to "+Name);
+                try {
+                    Character person = cc.Characters.Where(c => c.ShortName == Name).FirstOrDefault();
+                    person.HP = person.HP - damage;
+                    cc.SaveChanges();
+                    await cmct.RespondAsync("Dealed " + damage + " damage to " + Name);
+                }
+                catch (NullReferenceException ex)
+                {
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Color = DiscordColor.Black,
+                        Title = "Error!",
+                        Description = "Character with name " + Name + " does not exist in database."
+                    };
+                    await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
+                }
             }
         }
         [Command("hr")]
         [About("Reset HP.")]
         public async Task hr(CommandContext cmct, string Name) {
             using (CharacterContext cc = new CharacterContext()) {
-                var person = cc.Characters.Where(c => c.ShortName == Name).FirstOrDefault();
-                person.HP = person.max_HP;
-                cc.SaveChanges();
-                await cmct.RespondAsync("reseted HP for "+Name);
+                try {
+                    var person = cc.Characters.Where(c => c.ShortName == Name).FirstOrDefault();
+                    person.HP = person.max_HP;
+                    cc.SaveChanges();
+                    await cmct.RespondAsync("reseted HP for " + Name);
+                }
+                catch (NullReferenceException ex)
+                {
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Color = DiscordColor.Black,
+                        Title = "Error!",
+                        Description = "Character with name " + Name + " does not exist in database."
+                    };
+                    await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
+                }
             }
         }
 
@@ -247,8 +323,23 @@ namespace Dungeon_master
         [About("Modify parameter.")]
         public async Task mp(CommandContext cmct, string personName,string statName, params string[] param) {
             using (CharacterContext cc = new CharacterContext()) {
-                Character chara = cc.Characters.Where(c => c.ShortName == personName).FirstOrDefault();
-                PropertyInfo temp = chara.GetType().GetProperty(statName);
+                Character chara = null;
+                PropertyInfo temp = null;
+                try
+                {
+                    chara = cc.Characters.Where(c => c.ShortName == personName).FirstOrDefault();
+                    temp = chara.GetType().GetProperty(statName);
+                }
+                catch (NullReferenceException ex)
+                {
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Color = DiscordColor.Black,
+                        Title = "Error!",
+                        Description = "Character with name " + personName + " does not exist in database."
+                    };
+                    await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
+                }
                 try {
                     int a = Int32.Parse(param[0]);
                     temp.SetValue(chara, a);
