@@ -19,43 +19,37 @@ namespace Dungeon_master.cmnds
             string message = "";
 
             foreach (string mtch in context) {
-
-                Match m1 = Regex.Match(mtch, @"(\d)?d(\d)(\d)?(\+\d(\d)?)?(\+\d(\d)?)?(\+\d(\d)?)?(\-\d(\d)?)?(\-\d(\d)?)?(\-\d(\d)?)?(t)?", RegexOptions.IgnoreCase);
+                Match m1 = Regex.Match(mtch, @"(\d(\d)?)?d(\d)(\d)?", RegexOptions.IgnoreCase);
                 string expression = m1.Groups[0].Value;
                 if (m1.Groups[1].Success) {
                     count = int.Parse(expression[0].ToString());
+                    if (m1.Groups[2].Success) {
+                        count =count*10 + int.Parse(expression[1].ToString());
+                    }
                 }
-                if (m1.Groups[3].Success)
-                    numb = int.Parse(m1.Groups[2].Value + m1.Groups[3].Value);
-                else numb = int.Parse(m1.Groups[2].Value);
-
+                if (m1.Groups[4].Success)
+                    numb = int.Parse(m1.Groups[3].Value + m1.Groups[4].Value);
+                else numb = int.Parse(m1.Groups[3].Value);
                 for (int i =0;i<count;i++) {
                     result += Commands.r.Next(1,numb+1);
                 }
-                for (int i =4;i<9;i=i+2) {
-                    if (m1.Groups[i].Success)
-                    {
-                        bonus += int.Parse(expression[m1.Groups[i].Index + 1].ToString());
-                        if (m1.Groups[i+1].Success)
+                MatchCollection bonusMatches = Regex.Matches(mtch, @"([+--]\d(\d)?)");
+                if (bonusMatches.Count > 0) {
+                    for (int i=0;i<bonusMatches.Count;i++) {
+                        int temp = 0;
+                        temp = int.Parse(bonusMatches[i].Groups[1].Value[1].ToString());
+                        if (bonusMatches[i].Groups[2].Success)
                         {
-                            bonus += int.Parse(expression[m1.Groups[i].Index + 1].ToString() + expression[m1.Groups[i+1].Index].ToString()) - 1;
+                            temp = temp * 10 + int.Parse(bonusMatches[i].Groups[1].Value[2].ToString());
                         }
-                    }
-                }
-                for (int i = 10; i < 15; i = i + 2)
-                {
-                    if (m1.Groups[i].Success)
-                    {
-                        bonus -= int.Parse(expression[m1.Groups[i].Index + 1].ToString());
-                        if (m1.Groups[i + 1].Success)
-                        {
-                            bonus -= int.Parse(expression[m1.Groups[i].Index + 1].ToString() + expression[m1.Groups[i + 1].Index].ToString()) - 1;
-                        }
+                        if (bonusMatches[i].Groups[1].Value[0] == '-') temp = temp * -1;
+                        bonus = bonus+temp;
                     }
                 }
                 result += bonus;
-                if (m1.Groups[16].Success) total +=result;
-                message += "> " + expression + " = " + result+"\n";
+                Regex totalRegex = new Regex("t");
+                if (totalRegex.IsMatch(mtch)) total +=result;
+                message += "> " + mtch + " = " + result+"\n";
                 result = 0;
                 bonus = 0;
             }

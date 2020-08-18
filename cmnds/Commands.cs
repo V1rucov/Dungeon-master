@@ -38,6 +38,7 @@ namespace Dungeon_master
                         Description = "Character with name " + personName + " does not exist in database."
                     };
                     await cmct.RespondAsync(embed: embed).ConfigureAwait(false);
+                    Console.WriteLine(ex.Message);
                 }
                 int result = 0;
                 if (skillName==null) {
@@ -352,32 +353,6 @@ namespace Dungeon_master
                 await cmct.RespondAsync("saved.");
                 cc.SaveChanges();
             }
-        }
-
-        [Command("cgloc")]
-        [About("returns list of commands.")]
-        public async Task gloc(CommandContext cmct)
-        {
-            Type t = typeof(Commands);
-            MethodInfo[] methodInfo = t.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
-            await cmct.RespondAsync("list - " + methodInfo.Length);
-            string about = "";
-            foreach (var CC in methodInfo)
-            {
-
-                Type atr = typeof(AboutAttribute);
-                AboutAttribute Remark = (AboutAttribute)Attribute.GetCustomAttribute(CC, atr);
-
-                about = about + "**" + CC.Name + "** --" + Remark.Remark + " params:";
-                ParameterInfo[] pi = CC.GetParameters();
-                for (int i = 1; i < pi.Length; i++)
-                {
-                    var DD = pi[i];
-                    about = about + " " + DD.Name + "(" + DD.ParameterType + "),";
-                }
-                about = about + "\n";
-            }
-            await cmct.RespondAsync(about);
         }
     }
 }
