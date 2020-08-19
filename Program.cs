@@ -7,7 +7,6 @@ using System.Threading;
 using System.Diagnostics;
 using Dungeon_master.cmnds;
 using System.Xml;
-using IUI.SaveLoad;
 
 namespace Dungeon_master
 {
@@ -54,10 +53,8 @@ namespace Dungeon_master
             });
 
             CNMmodule.RegisterCommands<Commands>();
-            CNMmodule.RegisterCommands<OwnerCommands>();
             CNMmodule.RegisterCommands<PartyCommands>();
             CNMmodule.RegisterCommands<DiceRoller>();
-            CNMmodule.RegisterCommands<LoadCommands>();
 
             client.MessageCreated += async e =>
             {

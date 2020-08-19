@@ -65,7 +65,8 @@ namespace Dungeon_master
         {
             string skillCC = String.Join(" ", skills);
             Character temp = new Character() { ShortName = name, pow = pow, dex = dex, bod = body, wis = wisdom, Int = intel, cha = charisma,
-                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice, dice=dice, HP =dice,def=def, history="no.", name="no.", spellPoints="-"};
+                skills = skillCC, level = 1, ini=0, clas=clas, max_HP = dice+(body-10)/2, dice=dice, HP = dice + (body - 10) / 2,
+                def=def, history="no.", name=name, spellPoints="-"};
             using (CharacterContext cc = new CharacterContext())
             {
                 try
@@ -185,7 +186,7 @@ namespace Dungeon_master
             await cmct.RespondAsync("Level up "+Name+".");
         }
         [Command("ss")]
-        [About("Set a spell point.")]
+        [About("Set a spell points.")]
         public async Task ss(CommandContext cmct, string Name, params string[] points) {
             using (CharacterContext cc = new CharacterContext()) {
                 try {
