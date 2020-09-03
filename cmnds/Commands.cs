@@ -256,7 +256,7 @@ namespace Dungeon_master
             using (CharacterContext cc = new CharacterContext()) {
                 for (int j =0; j<list.Length;j++) {
                     if (team) {
-                        foreach (var temp in PartyCommands.Party)
+                        foreach (var temp in PartyCommands.prty[cmct.Channel.Name])
                         {
                             var person = cc.Characters.Where(c => c.name == temp).FirstOrDefault();
                             person.ini = Commands.r.Next(1, 20) + (person.dex - 10) / 2;

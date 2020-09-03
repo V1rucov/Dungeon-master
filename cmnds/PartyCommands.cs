@@ -11,7 +11,7 @@ namespace Dungeon_master.cmnds
 {
     class PartyCommands
     {
-        public static List<string> Party = new List<string>();
+        public static Dictionary<string,string[]> prty = new Dictionary<string, string[]>();
 
         [Command("cp")]
         [About("Creates a party of players")]
@@ -22,7 +22,8 @@ namespace Dungeon_master.cmnds
                     {
                         string tempName = names[i];
                         var temp = cc.Characters.Where(c => c.ShortName == tempName).FirstOrDefault();
-                        Party.Add(temp.name);
+                        prty.Add(cmct.Channel.Name,names);
+                        Console.WriteLine(cmct.Channel.Name+" ");
                     }
                     catch (Exception ex)
                     {
@@ -37,7 +38,7 @@ namespace Dungeon_master.cmnds
         [About("Returns a party of players")]
         public async Task gp(CommandContext cmct) {
             string toReturn = "";
-            foreach (var temp in Party) {
+            foreach (var temp in prty[cmct.Channel.Name]) {
                 toReturn += temp + ", ";
             }
             await cmct.RespondAsync(toReturn);
@@ -50,7 +51,7 @@ namespace Dungeon_master.cmnds
             {
                 try
                 {
-                    foreach (var temp in Party) {
+                    foreach (var temp in prty[cmct.Channel.Name]) {
                         var chara = cc.Characters.Where(c => c.name == temp).FirstOrDefault();
                         chara.level = chara.level + up;
                         for (int i = 0; i < up; i++)
