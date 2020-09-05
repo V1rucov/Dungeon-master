@@ -269,7 +269,7 @@ namespace Dungeon_master
                         CTemp.ini = r.Next(1, 20) + (CTemp.dex-10)/2;
                         members.Add(CTemp);
                     }
-                    catch (Exception ex) {
+                    catch{
                         members.Add(new Character() { name = list[j], Int = 10, dex = 10, wis = 10, pow = 10, bod = 10, cha = 10, ini = r.Next(1, 20) });
                     }
                 }
