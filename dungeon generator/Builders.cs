@@ -23,7 +23,9 @@ namespace Dungeon_master{
         }
     }
     class planarDungeon : dungeonType{
-        public string path = "dungeon generator/donj_planar.txt";
+        public planarDungeon(){
+            path = "dungeon generator/donj_planar.txt";
+        }
     }
     
 }
