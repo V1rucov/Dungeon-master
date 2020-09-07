@@ -1,6 +1,7 @@
 using System;
 
 namespace Dungeon_master{
+
     class DungeonElement{
         public string description{get;set;}
     }
@@ -17,6 +18,8 @@ namespace Dungeon_master{
 
     }
     class trap{
-
+        public string trigger {get;set;}
+        public string damage {get;set;}
+        public string effect {get;set;}
     }
 }

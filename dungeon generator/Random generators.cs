@@ -1,9 +1,10 @@
 using System;
 using System.IO;
+using System.Linq;
 using Dungeon_master.cmnds;
 
 namespace Dungeon_master{
-    class randomTable{
+    class randomTableGet{
         public string Generate(string path, int sides){
             StreamReader sr = new StreamReader(path);
             int numb = Commands.r.Next(1,sides);
