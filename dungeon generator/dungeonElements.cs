@@ -2,9 +2,6 @@ using System;
 
 namespace Dungeon_master{
 
-    class DungeonElement{
-        public string description{get;set;}
-    }
     class Room{
         public string Form{get;set;}
         public int exits{get;set;}
