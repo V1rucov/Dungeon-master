@@ -355,5 +355,9 @@ namespace Dungeon_master
                 cc.SaveChanges();
             }
         }
+        [Command("wiki")]
+        public async Task hlp(CommandContext cmct){
+            await cmct.RespondAsync("https://github.com/V1rucov/Dungeon-master/wiki");
+        }
     }
 }
