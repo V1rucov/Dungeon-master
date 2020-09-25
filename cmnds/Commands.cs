@@ -323,7 +323,7 @@ namespace Dungeon_master
 
         [Command("mp")]
         [About("Modify parameter.")]
-        public async Task mp(CommandContext cmct, string personName,string statName, params string[] param) {
+        public async Task mp(CommandContext cmct, string personName,string statName, bool add=false,params string[] param) {
             using (CharacterContext cc = new CharacterContext()) {
                 Character chara = null;
                 PropertyInfo temp = null;
@@ -354,6 +354,14 @@ namespace Dungeon_master
                 await cmct.RespondAsync("saved.");
                 cc.SaveChanges();
             }
+        }
+        [Command("ms")]
+        [About("manage character's skills")]
+        public async Task ms(CommandContext cmct, string personName){
+            var embed = new DiscordEmbedBuilder{
+                Title="Skill list:",
+                Description=""
+            };
         }
         [Command("wiki")]
         public async Task hlp(CommandContext cmct){
